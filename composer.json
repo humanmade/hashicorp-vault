@@ -24,5 +24,10 @@
     "config": {
         "autoloader-suffix": "HumanMadeHashicorpVault",
         "sort-packages": true
+    },
+    "require-dev": {
+        "phpcompatibility/php-compatibility": "^8",
+        "slevomat/coding-standard": "^5.0",
+        "wp-coding-standards/wpcs": "^2.0"
     }
 }

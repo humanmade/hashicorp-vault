@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.2-cli-stretch
+
+    steps:
+      - checkout
+      - run:
+          name: "Install software"
+          command: |
+            mkdir ~/php-codesniffer && curl -L https://github.com/squizlabs/PHP_CodeSniffer/archive/master.tar.gz | tar xz --strip-components=1 -C ~/php-codesniffer
+            composer install --no-interaction
+      - run:
+          name: "Check code standards"
+          command: |
+            ./vendor/bin/phpcs -n -p -s --colors .
