@@ -28,7 +28,7 @@ function set_up() : void {
  *
  * @param string $secret Secret name.
  *
- * @return array|null Returns null if unable to be retrieve the secret for an uncaught reason.
+ * @return array|null Returns null if unable to be retrieve the secret. See `get_secret_from_vault()`.
  */
 function get_secret( string $secret ) : ?array {
 	$transient = get_transient_name( $secret );
@@ -42,16 +42,7 @@ function get_secret( string $secret ) : ?array {
 		}
 
 		set_transient( $transient, $data, 0 );
-
-		// Random reduces likelihood that many keys will start expiring at the same time.
-		$timestamp = time() + round( ( $data['lease_duration'] / 4 ) * 3 ) + mt_rand( 0, 30 );
-
-		// Auto-update before lease expiry.
-		wp_schedule_single_event(
-			$timestamp,
-			'humanmade/hashicorp-vault/update_secret',
-			[ $secret ]
-		);
+		schedule_secret_update( $secret, $data );
 	}
 
 	return $data;
@@ -108,7 +99,7 @@ function get_secret_from_vault( string $secret ) : array {
 }
 
 /**
- * Update a secret's cached value before its lease expires.
+ * Update a secret before its lease expires.
  *
  * Currently, to renew the lease, we fetch the entire secret again to get a new lease.
  * A future enhancement would be to check if the secret supports `lease_renewable` and,
@@ -118,7 +109,6 @@ function get_secret_from_vault( string $secret ) : array {
  */
 function update_secret( string $secret ) : void {
 	$lock_name = 'humanmade/hashicorp-vault/update_secret';
-
 	if ( ! wpdesk_acquire_lock( $lock_name ) ) {
 		return;
 	}
@@ -131,6 +121,8 @@ function update_secret( string $secret ) : void {
 	}
 
 	set_transient( get_transient_name( $secret ), $data, 0 );
+	schedule_secret_update( $secret, $data );
+
 	wpdesk_release_lock( $lock_name );
 }
 
@@ -182,5 +174,26 @@ function get_auth_token() : string {
 	return apply_filters(
 		'humanmade/hashicorp-vault/get_auth_token',
 		$token
+	);
+}
+
+/**
+ * Schedule the next update of a secret.
+ *
+ * A secret is updated prior to the lease_duration expiring for the current lease.
+ * This ensures that the cached secret is always up-to-date and usable.
+ *
+ * @param string $secret Secret name.
+ * @param array  $data   Secret data. See `get_secret_from_vault()`.
+ */
+function schedule_next_secret_update( string $secret, array $data ) : void {
+
+	// Random reduces likelihood that many keys will start expiring at the same time.
+	$timestamp = time() + round( $data['lease_duration'] * 0.8 ) + mt_rand( 0, 30 );
+
+	wp_schedule_single_event(
+		$timestamp,
+		'humanmade/hashicorp-vault/update_secret',
+		[ $secret ]
 	);
 }
