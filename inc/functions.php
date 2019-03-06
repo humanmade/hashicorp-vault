@@ -3,16 +3,19 @@
  * HashiCorp Vault integration for WordPress.
  *
  * Access Vault secrets, utilising WordPress APIs for maximum scalability.
+ *
+ * @package HM\Hashicorp_Vault
  */
 
 declare( strict_types = 1 );
 
 namespace HM\Hashicorp_Vault;
 
-use Exception, RuntimeException;
+use Exception;
+use RuntimeException;
 use Vault;
-use Vault\AuthenticationStrategies;
 use VaultTransports;
+use Vault\AuthenticationStrategies;
 
 const CRON_TASK = 'humanmade/hashicorp-vault/update_secret';
 
@@ -68,11 +71,7 @@ function get_secret( string $secret ) : ?array {
  *     @type string $security_token AWS temporary session token.
  * }
  *
- * @throws \InvalidArgumentException
- * @throws RuntimeException
- * @throws \Vault\Exceptions\ClientException
- * @throws \Vault\Exceptions\TransportException
- * @throws \Vault\Exceptions\ServerException
+ * @throws RuntimeException From `csharpru/vault-php`.
  */
 function get_secret_from_vault( string $secret ) : array {
 	$vault = new Vault\Client(
@@ -94,8 +93,8 @@ function get_secret_from_vault( string $secret ) : array {
 	return array_merge(
 		$response->getData(),
 		[
-			'lease_duration' => (int) $response->leaseDuration,
-			'lease_id'       => $response->leaseId,
+			'lease_duration' => (int) $response->leaseDuration,  // phpcs:ignore
+			'lease_id'       => $response->leaseId,              // phpcs:ignore
 		]
 	);
 }
@@ -137,8 +136,8 @@ function update_secret( string $secret ) : void {
  *
  * @return string
  */
-function get_transient_name( string $transient ) : string {
-	return 'hm-hashicorp-vault-' . md5( $transient );
+function get_transient_name( string $secret ) : string {
+	return 'hm-hashicorp-vault-' . md5( $secret );
 }
 
 /**
