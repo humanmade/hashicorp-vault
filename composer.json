@@ -16,8 +16,13 @@
             "email": "djpaul@gmail.com"
         }
     ],
+    "autoload": {
+        "files": [
+            "plugin.php"
+        ]
+    },
     "config": {
         "autoloader-suffix": "HumanMadeHashicorpVault",
         "sort-packages": true
-	}
+    }
 }
