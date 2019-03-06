@@ -1,0 +1,23 @@
+{
+    "name": "humanmade/hashicorp-vault",
+    "description": "HashiCorp Vault integration plugin for WordPress",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": "~7.2",
+        "composer/installers": "^1.6",
+        "csharpru/vault-php": "^3.6",
+        "csharpru/vault-php-guzzle6-transport": "^2.0",
+        "wpdesk/wp-mutex": "^1.1"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Paul Gibbs",
+            "email": "djpaul@gmail.com"
+        }
+    ],
+    "config": {
+        "autoloader-suffix": "HumanMadeHashicorpVault",
+        "sort-packages": true
+	}
+}

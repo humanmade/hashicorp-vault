@@ -1,0 +1,2 @@
+# Exclude third-party dependencies.
+/vendor
