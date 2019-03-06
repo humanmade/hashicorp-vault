@@ -1,6 +1,6 @@
 <table width="100%">
 	<tr>
-		<td align="left" width="70" colspan="2">
+		<td align="left" width="100%" colspan="2">
 			<strong>HashiCorp Vault integration for WordPress</strong><br />
 			Access Vault secrets, utilising WordPress APIs for maximum scalability.
 		</td>
@@ -29,6 +29,7 @@ This library is distributed as a WordPress plugin. [Install with Composer](https
 In `wp-config.php`, define your Vault token:
 
 `define( 'HM_HASHICORP_VAULT_AUTH_TOKEN', 'your-token-123' );`
+
 `define( 'HM_HASHICORP_VAULT_URL', 'https://example.com/your-vault/' );`
 
 ## License
