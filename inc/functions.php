@@ -117,19 +117,21 @@ function get_secret_from_vault( string $secret ) : array {
  * @param string $secret Secret name.
  */
 function update_secret( string $secret ) : void {
-	if ( ! wpdesk_acquire_lock( 'humanmade/hashicorp-vault/update_secret' ) ) {
+	$lock_name = 'humanmade/hashicorp-vault/update_secret';
+
+	if ( ! wpdesk_acquire_lock( $lock_name ) ) {
 		return;
 	}
 
 	try {
 		$data = get_secret_from_vault( $secret );
 	} catch ( Exception $error ) {
-		wpdesk_release_lock( 'humanmade/hashicorp-vault/update_secret' );
+		wpdesk_release_lock( $lock_name );
 		return;
 	}
 
 	set_transient( get_transient_name( $secret ), $data, 0 );
-	wpdesk_release_lock( 'humanmade/hashicorp-vault/update_secret' );
+	wpdesk_release_lock( $lock_name );
 }
 
 /**
