@@ -14,13 +14,15 @@ use Vault;
 use Vault\AuthenticationStrategies;
 use VaultTransports;
 
+const CRON_TASK = 'humanmade/hashicorp-vault/update_secret';
+
 /**
  * Set up plugin.
  *
  * Register actions and filters.
  */
 function set_up() : void {
-	add_action( 'humanmade/hashicorp-vault/update_secret', __NAMESPACE__ . '\update_secret', 10, 1 );
+	add_action( CRON_TASK, __NAMESPACE__ . '\update_secret', 10, 1 );
 }
 
 /**
@@ -108,7 +110,7 @@ function get_secret_from_vault( string $secret ) : array {
  * @param string $secret Secret name.
  */
 function update_secret( string $secret ) : void {
-	$lock_name = 'humanmade/hashicorp-vault/update_secret';
+	$lock_name = CRON_TASK;
 	if ( ! wpdesk_acquire_lock( $lock_name ) ) {
 		return;
 	}
@@ -193,7 +195,7 @@ function schedule_next_secret_update( string $secret, array $data ) : void {
 
 	wp_schedule_single_event(
 		$timestamp,
-		'humanmade/hashicorp-vault/update_secret',
+		CRON_TASK,
 		[ $secret ]
 	);
 }
