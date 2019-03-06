@@ -124,6 +124,7 @@ function update_secret( string $secret ) : void {
 	try {
 		$data = get_secret_from_vault( $secret );
 	} catch ( Exception $error ) {
+		wpdesk_release_lock( 'humanmade/hashicorp-vault/update_secret' );
 		return;
 	}
 
