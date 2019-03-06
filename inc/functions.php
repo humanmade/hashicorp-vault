@@ -47,7 +47,7 @@ function get_secret( string $secret ) : ?array {
 		}
 
 		set_transient( $transient, $data, 0 );
-		schedule_secret_update( $secret, $data );
+		schedule_next_secret_update( $secret, $data );
 	}
 
 	return $data;
@@ -122,7 +122,7 @@ function update_secret( string $secret ) : void {
 	}
 
 	set_transient( get_transient_name( $secret ), $data, 0 );
-	schedule_secret_update( $secret, $data );
+	schedule_next_secret_update( $secret, $data );
 
 	wpdesk_release_lock( $lock_name );
 }
