@@ -20,15 +20,15 @@ use VaultTransports;
  * Register actions and filters.
  */
 function set_up() : void {
-	add_action( 'humanmade/hashicorp-vault/update_cached_secret', __NAMESPACE__ . '\update_cached_secret', 10, 1 );
+	add_action( 'humanmade/hashicorp-vault/update_secret', __NAMESPACE__ . '\update_secret', 10, 1 );
 }
 
 /**
- * Get a Vault secret. Cached.
+ * Get a Vault secret (cached).
  *
  * @param string $secret Secret name.
  *
- * @return array|null Returns null if secret unable to be retried.
+ * @return array|null Returns null if unable to be retrieve the secret for an uncaught reason.
  */
 function get_secret( string $secret ) : ?array {
 	$transient = get_transient_name( $secret );
@@ -46,10 +46,10 @@ function get_secret( string $secret ) : ?array {
 		// Random reduces likelihood that many keys will start expiring at the same time.
 		$timestamp = time() + round( ( $data['lease_duration'] / 4 ) * 3 ) + mt_rand( 0, 30 );
 
-		// Auto-update the secret prior to lease expiry.
+		// Auto-update before lease expiry.
 		wp_schedule_single_event(
 			$timestamp,
-			'humanmade/hashicorp-vault/update_cached_secret',
+			'humanmade/hashicorp-vault/update_secret',
 			[ $secret ]
 		);
 	}
@@ -108,16 +108,18 @@ function get_secret_from_vault( string $secret ) : array {
 }
 
 /**
- * Update this secret's cached value (prior to its lease expiring).
+ * Update a secret's cached value before its lease expires.
+ *
+ * Currently, to renew the lease, we fetch the entire secret again to get a new lease.
+ * A future enhancement would be to check if the secret supports `lease_renewable` and,
+ * if so, use that to renew the existing lease programatically via Vault's APIs.
  *
  * @param string $secret Secret name.
  */
-function update_cached_secret( string $secret ) : void {
-	if ( ! wpdesk_acquire_lock( 'humanmade/hashicorp-vault/update_cached_secret' ) ) {
+function update_secret( string $secret ) : void {
+	if ( ! wpdesk_acquire_lock( 'humanmade/hashicorp-vault/update_secret' ) ) {
 		return;
 	}
-
-	$transient = get_transient_name( $secret );
 
 	try {
 		$data = get_secret_from_vault( $secret );
@@ -125,8 +127,8 @@ function update_cached_secret( string $secret ) : void {
 		return;
 	}
 
-	set_transient( $transient, $data, 0 );
-	wpdesk_release_lock( 'humanmade/hashicorp-vault/update_cached_secret' );
+	set_transient( get_transient_name( $secret ), $data, 0 );
+	wpdesk_release_lock( 'humanmade/hashicorp-vault/update_secret' );
 }
 
 /**
