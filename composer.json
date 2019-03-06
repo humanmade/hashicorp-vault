@@ -26,7 +26,25 @@
         "sort-packages": true
     },
     "require-dev": {
+        "brainmaestro/composer-git-hooks": "^2.6",
         "humanmade/coding-standards": "^0.5.0",
         "phpcompatibility/php-compatibility": "^8"
+    },
+    "extra": {
+        "hooks": {
+            "pre-commit": "composer precommit"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "ps -ocommand= -p $PPID | grep no-dev > /dev/null && echo dev || vendor/bin/cghooks update"
+        ],
+        "post-update-cmd": [
+            "vendor/bin/cghooks update"
+        ],
+        "precommit": [
+            "@phpcs"
+        ],
+        "phpcs": "vendor/bin/phpcs -n -p -s --colors ."
     }
 }
