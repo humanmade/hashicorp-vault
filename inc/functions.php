@@ -26,13 +26,6 @@ use WPDesk\Mutex;
 const CRON_OPTION = 'humanmade/hashicorp-vault/update_secret';
 
 /**
- * Used to track deadlocks.
- *
- * @var string
- */
-const DEADLOCK_OPTION = 'humanmade/hashicorp-vault/deadlock_timestamp';
-
-/**
  * Set up plugin.
  *
  * Register actions and filters.
@@ -123,7 +116,7 @@ function get_secret_from_vault( string $secret ) : array {
  */
 function update_secret( string $secret ) : void {
 	if ( ! wpdesk_acquire_lock( $secret ) ) {
-		$lock_time = (int) get_option( DEADLOCK_OPTION, 0 );
+		$lock_time = (int) get_option( get_deadlock_name( $secret ), 0 );
 
 		// Handle a potential deadlock.
 		if ( $lock_time > 0 && ( time() - $lock_time ) > ( 5 * MINUTE_IN_SECONDS ) ) {
@@ -134,7 +127,7 @@ function update_secret( string $secret ) : void {
 	}
 
 	// Record time the lock was acquired.
-	update_option( DEADLOCK_OPTION, time(), 'yes' );
+	update_option( get_deadlock_name( $secret ), time(), 'yes' );
 
 	try {
 		$data = get_secret_from_vault( $secret );
@@ -158,7 +151,20 @@ function update_secret( string $secret ) : void {
  * @return string
  */
 function get_transient_name( string $secret ) : string {
-	return 'hm-hashicorp-vault-' . md5( $secret );
+	return 'hm_hcvault_vault_' . md5( $secret );
+}
+
+/**
+ * Get a name for a secret's update lock, based on the Vault secret.
+ *
+ * Consolidates naming conventions and key length management.
+ *
+ * @param string $secret Vault secret to use as the base of a transient.
+ *
+ * @return string
+ */
+function get_deadlock_name( string $secret ) : string {
+	return 'hm_hcvault_deadlock_' . md5( $secret );
 }
 
 /**
@@ -228,7 +234,7 @@ function schedule_next_secret_update( string $secret, array $data ) : void {
 function release_secret_lock( string $secret ) : void {
 	try {
 		wpdesk_release_lock( $secret );
-		delete_option( DEADLOCK_OPTION );
+		delete_option( get_deadlock_name( $secret ) );
 	} catch ( Mutex\MutexNotFoundInStorage $error ) {
 		// No harm done.
 	}
