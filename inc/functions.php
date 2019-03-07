@@ -122,32 +122,30 @@ function get_secret_from_vault( string $secret ) : array {
  * @param string $secret Secret name.
  */
 function update_secret( string $secret ) : void {
-	$lock_name = CRON_TASK;
+	if ( ! wpdesk_acquire_lock( $secret ) ) {
+		$lock_time = (int) get_option( DEADLOCK_OPTION, 0 );
 
-	if ( ! wpdesk_acquire_lock( $lock_name ) ) {
-		return;
-	}
-
-	try {
-		$data = get_secret_from_vault( $secret );
-	} catch ( Exception $error ) {
-		try {
-			wpdesk_release_lock( $lock_name );
-		} catch ( Mutex\MutexNotFoundInStorage $error ) {
-			// No harm done.
+		// Handle a potential deadlock.
+		if ( $lock_time > 0 && ( time() - $lock_time ) > ( 5 * MINUTE_IN_SECONDS ) ) {
+			release_secret_lock( $secret );
 		}
 
 		return;
 	}
 
-	set_transient( get_transient_name( $secret ), $data, 0 );
-	schedule_next_secret_update( $secret, $data );
+	// Record time the lock was acquired.
+	update_option( DEADLOCK_OPTION, time(), 'yes' );
 
 	try {
-		wpdesk_release_lock( $lock_name );
-	} catch ( Mutex\MutexNotFoundInStorage $error ) {
-		// No harm done.
+		$data = get_secret_from_vault( $secret );
+	} catch ( Exception $error ) {
+		release_secret_lock( $secret );
+		return;
 	}
+
+	set_transient( get_transient_name( $secret ), $data, 0 );
+	schedule_next_secret_update( $secret, $data );
+	release_secret_lock( $secret );
 }
 
 /**
@@ -220,4 +218,18 @@ function schedule_next_secret_update( string $secret, array $data ) : void {
 		CRON_OPTION,
 		[ $secret ]
 	);
+}
+
+/**
+ * Convenience function to release the update lock for a given secret.
+ *
+ * @param string $secret Secret name.
+ */
+function release_secret_lock( string $secret ) : void {
+	try {
+		wpdesk_release_lock( $secret );
+		delete_option( DEADLOCK_OPTION );
+	} catch ( Mutex\MutexNotFoundInStorage $error ) {
+		// No harm done.
+	}
 }
