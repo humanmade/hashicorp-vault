@@ -20,6 +20,9 @@
 
 		<!-- Don't restrict namespace to `inc/` directory. -->
 		<exclude name="HM.Files.NamespaceDirectoryName.NoIncDirectory" />
+
+		<!-- Don't enforce naming conventions for hooks. -->
+		<exclude name="WordPress.NamingConventions.ValidHookName.UseUnderscores" />
 	</rule>
 
 	<!-- Use WordPress coding standards. -->

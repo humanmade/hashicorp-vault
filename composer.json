@@ -45,6 +45,6 @@
         "precommit": [
             "@phpcs"
         ],
-        "phpcs": "vendor/bin/phpcs -n -p -s --colors ."
+        "phpcs": "vendor/bin/phpcs -p -s --colors ."
     }
 }
