@@ -16,6 +16,7 @@ use RuntimeException;
 use Vault;
 use VaultTransports;
 use Vault\AuthenticationStrategies;
+use WPDesk\Mutex;
 
 const CRON_TASK = 'humanmade/hashicorp-vault/update_secret';
 
@@ -110,6 +111,7 @@ function get_secret_from_vault( string $secret ) : array {
  */
 function update_secret( string $secret ) : void {
 	$lock_name = CRON_TASK;
+
 	if ( ! wpdesk_acquire_lock( $lock_name ) ) {
 		return;
 	}
@@ -117,14 +119,23 @@ function update_secret( string $secret ) : void {
 	try {
 		$data = get_secret_from_vault( $secret );
 	} catch ( Exception $error ) {
-		wpdesk_release_lock( $lock_name );
+		try {
+			wpdesk_release_lock( $lock_name );
+		} catch ( Mutex\MutexNotFoundInStorage $error ) {
+			// No harm done.
+		}
+
 		return;
 	}
 
 	set_transient( get_transient_name( $secret ), $data, 0 );
 	schedule_next_secret_update( $secret, $data );
 
-	wpdesk_release_lock( $lock_name );
+	try {
+		wpdesk_release_lock( $lock_name );
+	} catch ( Mutex\MutexNotFoundInStorage $error ) {
+		// No harm done.
+	}
 }
 
 /**
