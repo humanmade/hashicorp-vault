@@ -26,11 +26,16 @@ Current limitations:
 ## Installation
 This library is distributed as a WordPress plugin. [Install with Composer](https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies), and activate the plugin in the usual way.
 
+## Usage
 In `wp-config.php`, define your Vault token:
 
 `define( 'HM_HASHICORP_VAULT_AUTH_TOKEN', 'your-token-123' );`
 
 `define( 'HM_HASHICORP_VAULT_URL', 'https://example.com/your-vault/' );`
+
+You do not need to activate this plugin in wp-admin, but your application does need to load Composer's autoloader when WordPress plugins are being loaded. For example, this could be done via a `mu-plugin` that simply does:
+
+`require_once __DIR__ . '/vendor/autoload.php';`
 
 ## License
 This project is made availabile with the MIT license.
