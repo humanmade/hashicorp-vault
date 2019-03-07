@@ -47,6 +47,7 @@ function get_secret( string $secret ) : ?array {
 
 	if ( $data === false ) {
 		try {
+			// If we don't have the secret, fetch it synchronously.
 			$data = get_secret_from_vault( $secret );
 		} catch ( Exception $error ) {
 			return null;
@@ -111,6 +112,8 @@ function get_secret_from_vault( string $secret ) : array {
  * Currently, to renew the lease, we fetch the entire secret again to get a new lease.
  * A future enhancement would be to check if the secret supports `lease_renewable` and,
  * if so, use that to renew the existing lease programatically via Vault's APIs.
+ *
+ * This function is invoked by wp-cron.
  *
  * @param string $secret Secret name.
  */
