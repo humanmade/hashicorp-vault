@@ -118,8 +118,10 @@ function get_secret_from_vault( string $secret ) : array {
  * @param string $secret Secret name.
  */
 function update_secret( string $secret ) : void {
+	$deadlock = get_deadlock_name( $secret );
+
 	if ( ! wpdesk_acquire_lock( $secret ) ) {
-		$lock_time = (int) get_option( get_deadlock_name( $secret ), 0 );
+		$lock_time = (int) get_option( $deadlock, 0 );
 
 		// Handle a potential deadlock.
 		if ( $lock_time > 0 && ( time() - $lock_time ) > ( 5 * MINUTE_IN_SECONDS ) ) {
@@ -130,7 +132,7 @@ function update_secret( string $secret ) : void {
 	}
 
 	// Record time the lock was acquired.
-	update_option( get_deadlock_name( $secret ), time(), 'yes' );
+	update_option( $deadlock, time(), 'yes' );
 
 	try {
 		$data = get_secret_from_vault( $secret );
