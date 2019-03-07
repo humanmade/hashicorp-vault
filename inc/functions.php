@@ -18,7 +18,19 @@ use VaultTransports;
 use Vault\AuthenticationStrategies;
 use WPDesk\Mutex;
 
-const CRON_TASK = 'humanmade/hashicorp-vault/update_secret';
+/**
+ * WordPress cron task name for refreshing secrets.
+ *
+ * @var string
+ */
+const CRON_OPTION = 'humanmade/hashicorp-vault/update_secret';
+
+/**
+ * Used to track deadlocks.
+ *
+ * @var string
+ */
+const DEADLOCK_OPTION = 'humanmade/hashicorp-vault/deadlock_timestamp';
 
 /**
  * Set up plugin.
@@ -26,7 +38,7 @@ const CRON_TASK = 'humanmade/hashicorp-vault/update_secret';
  * Register actions and filters.
  */
 function set_up() : void {
-	add_action( CRON_TASK, __NAMESPACE__ . '\update_secret', 10, 1 );
+	add_action( CRON_OPTION, __NAMESPACE__ . '\update_secret', 10, 1 );
 }
 
 /**
@@ -205,7 +217,7 @@ function schedule_next_secret_update( string $secret, array $data ) : void {
 
 	wp_schedule_single_event(
 		$timestamp,
-		CRON_TASK,
+		CRON_OPTION,
 		[ $secret ]
 	);
 }
