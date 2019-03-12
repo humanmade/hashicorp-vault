@@ -222,10 +222,10 @@ function get_auth_token() : string {
 function schedule_next_secret_update( string $secret, array $data ) : void {
 
 	// Random reduces likelihood that many keys will start expiring at the same time.
-	$timestamp = time() + round( $data['lease_duration'] * 0.8 ) + mt_rand( 0, 30 );
+	$timestamp = time() + ( $data['lease_duration'] * 0.8 ) + mt_rand( 0, 30 );
 
 	wp_schedule_single_event(
-		$timestamp,
+		(int) $timestamp,
 		CRON_OPTION,
 		[ $secret ]
 	);
