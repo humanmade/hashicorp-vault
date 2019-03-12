@@ -5,7 +5,7 @@
  * Author: Human Made Limited
  * Author URI: https://humanmade.com
  * License: MIT
- * Version: 0.4.0
+ * Version: 0.5.0
  *
  * @package HM\Hashicorp_Vault
  *
