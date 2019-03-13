@@ -269,16 +269,16 @@
         },
         {
             "name": "csharpru/vault-php-guzzle6-transport",
-            "version": "2.0.3",
+            "version": "2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CSharpRU/vault-php-guzzle6-transport.git",
-                "reference": "030b8bd2e6ffbeb680d08e02e8fa4a311d8c1878"
+                "reference": "33c392120ac9f253b62b034e0e8ffbbdb3513bd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CSharpRU/vault-php-guzzle6-transport/zipball/030b8bd2e6ffbeb680d08e02e8fa4a311d8c1878",
-                "reference": "030b8bd2e6ffbeb680d08e02e8fa4a311d8c1878",
+                "url": "https://api.github.com/repos/CSharpRU/vault-php-guzzle6-transport/zipball/33c392120ac9f253b62b034e0e8ffbbdb3513bd8",
+                "reference": "33c392120ac9f253b62b034e0e8ffbbdb3513bd8",
                 "shasum": ""
             },
             "require": {
@@ -303,7 +303,7 @@
                 }
             ],
             "description": "Guzzle6 transport for Vault PHP client",
-            "time": "2017-08-11T08:19:01+00:00"
+            "time": "2019-03-10T06:17:37+00:00"
         },
         {
             "name": "doctrine/cache",

@@ -33,9 +33,7 @@ In `wp-config.php`, define your Vault token:
 
 `define( 'HM_HASHICORP_VAULT_URL', 'https://example.com/your-vault/' );`
 
-You do not need to activate this plugin in wp-admin, but your application does need to load Composer's autoloader when WordPress plugins are being loaded. For example, this could be done via a `mu-plugin` that simply does:
-
-`require_once __DIR__ . '/vendor/autoload.php';`
+Load the plugin in WordPress by requiring `hashicorp-vault/plugin.php`.
 
 ## License
 This project is made availabile with the MIT license.

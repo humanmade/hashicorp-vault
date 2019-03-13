@@ -27,7 +27,4 @@ namespace HM\Hashicorp_Vault;
 
 require_once __DIR__ . '/inc/functions.php';
 
-// For PHPCS.
-if ( function_exists( 'add_action' ) ) {
-	add_action( 'muplugins_loaded', __NAMESPACE__ . '\set_up' );
-}
+add_action( 'muplugins_loaded', __NAMESPACE__ . '\set_up' );
