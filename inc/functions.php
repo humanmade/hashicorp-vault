@@ -53,7 +53,7 @@ function get_secret( string $secret ) : ?array {
 			return null;
 		}
 
-		set_transient( $transient, $data, 0 );
+		set_transient( $transient, $data, $data['lease_duration'] );
 		schedule_next_secret_update( $secret, $data );
 	}
 
@@ -141,7 +141,7 @@ function update_secret( string $secret ) : void {
 		return;
 	}
 
-	set_transient( get_transient_name( $secret ), $data, 0 );
+	set_transient( get_transient_name( $secret ), $data, $data['lease_duration'] );
 	schedule_next_secret_update( $secret, $data );
 	release_secret_lock( $secret );
 }
