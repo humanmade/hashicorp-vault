@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6678e13a338a7c19a2850bd9c2c98f6c",
+    "content-hash": "1f26eda8b2cd0d2125501363dde30306",
     "packages": [
         {
             "name": "cache/cache",
@@ -88,7 +88,7 @@
                 {
                     "name": "Tobias Nyholm",
                     "email": "tobias.nyholm@gmail.com",
-                    "homepage": "https://github.com/nyholm"
+                    "homepage": "https://github.com/Nyholm"
                 }
             ],
             "description": "Library of all the php-cache adapters",

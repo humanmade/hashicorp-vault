@@ -12,6 +12,7 @@ declare( strict_types = 1 );
 namespace HM\Hashicorp_Vault;
 
 use Exception;
+use Psr\Log;
 use RuntimeException;
 use Vault;
 use VaultTransports;
@@ -37,17 +38,18 @@ function set_up() : void {
 /**
  * Get a Vault secret (cached).
  *
- * @param string $secret Secret name.
+ * @param string              $secret Secret name.
+ * @param Log\LoggerInterface $logger Optional. A PSR-3 compatible logger to use for errors.
  *
  * @return array Secret data from Vault. See `get_secret_from_vault()`.
  */
-function get_secret( string $secret ) : array {
+function get_secret( string $secret, Log\LoggerInterface $logger = null ) : array {
 	$transient = get_transient_name( $secret );
 	$data      = get_transient( $transient );
 
 	if ( $data === false ) {
 		// If we don't have the secret, fetch it synchronously.
-		$data = get_secret_from_vault( $secret );
+		$data = get_secret_from_vault( $secret, $logger );
 
 		set_transient( $transient, $data, $data['lease_duration'] - 10 );
 		schedule_next_secret_update( $secret, $data );
@@ -59,7 +61,8 @@ function get_secret( string $secret ) : array {
 /**
  * Get a secret directly from Vault (not cached).
  *
- * @param string $secret Secret name.
+ * @param string              $secret Secret name.
+ * @param Log\LoggerInterface $logger Optional. A PSR-3 compatible logger to use for errors.
  *
  * @return array {
  *     Secret data from Vault. In addition to a secret's key/value pairs, the response also includes:
@@ -76,17 +79,20 @@ function get_secret( string $secret ) : array {
  *
  * @throws RuntimeException From `csharpru/vault-php`.
  */
-function get_secret_from_vault( string $secret ) : array {
+function get_secret_from_vault( string $secret, Log\LoggerInterface $logger = null ) : array {
 	$vault = new Vault\Client(
 		new VaultTransports\Guzzle6Transport( [
 			'base_uri' => get_vault_url(),
 		] )
 	);
 
-	$authenticated = $vault
-		->setAuthenticationStrategy( new AuthenticationStrategies\TokenAuthenticationStrategy( get_auth_token() ) )
-		->authenticate();
+	$vault->setAuthenticationStrategy( new AuthenticationStrategies\TokenAuthenticationStrategy( get_auth_token() ) );
 
+	if ( $logger !== null ) {
+		$vault->setLogger( $logger );
+	}
+
+	$authenticated = $vault->authenticate();
 	if ( $authenticated === false ) {
 		throw new RuntimeException( 'Unable to authenticate.' );
 	}
