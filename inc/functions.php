@@ -39,19 +39,15 @@ function set_up() : void {
  *
  * @param string $secret Secret name.
  *
- * @return array|null Returns null if unable to be retrieve the secret. See `get_secret_from_vault()`.
+ * @return array Secret data from Vault. See `get_secret_from_vault()`.
  */
-function get_secret( string $secret ) : ?array {
+function get_secret( string $secret ) : array {
 	$transient = get_transient_name( $secret );
 	$data      = get_transient( $transient );
 
 	if ( $data === false ) {
-		try {
-			// If we don't have the secret, fetch it synchronously.
-			$data = get_secret_from_vault( $secret );
-		} catch ( Exception $error ) {
-			return null;
-		}
+		// If we don't have the secret, fetch it synchronously.
+		$data = get_secret_from_vault( $secret );
 
 		set_transient( $transient, $data, $data['lease_duration'] - 10 );
 		schedule_next_secret_update( $secret, $data );
